@@ -15,9 +15,9 @@ import {
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/team', label: 'Ekip', icon: Users },
   { href: '/tasks', label: 'Görevler', icon: CheckSquare },
   { href: '/projects', label: 'Projeler', icon: FolderKanban },
-  { href: '/team', label: 'Ekip', icon: Users },
   { href: '/messages', label: 'Mesajlar', icon: MessageSquare },
   { href: '/calendar', label: 'Takvim', icon: Calendar },
 ]

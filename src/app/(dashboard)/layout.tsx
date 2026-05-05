@@ -11,9 +11,15 @@ export default async function DashboardLayout({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
+  if (!user) redirect('/login')
+
+  const { data: member } = await supabase
+    .from('office_members')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!member) redirect('/onboarding')
 
   return (
     <div className="flex h-screen bg-neutral-50">

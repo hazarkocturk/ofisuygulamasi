@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -27,8 +27,10 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') ?? '/'
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<LoginValues>({
@@ -46,10 +48,51 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/')
+    router.push(redirectTo)
     router.refresh()
   }
 
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>E-posta</FormLabel>
+              <FormControl>
+                <Input placeholder="ornek@hukukofisi.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Şifre</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {serverError && (
+          <p className="text-sm font-medium text-destructive">{serverError}</p>
+        )}
+        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? 'Giriş yapılıyor…' : 'Giriş Yap'}
+        </Button>
+      </form>
+    </Form>
+  )
+}
+
+export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50">
       <Card className="w-full max-w-sm">
@@ -58,46 +101,9 @@ export default function LoginPage() {
           <CardDescription>Hesabınıza erişmek için bilgilerinizi girin</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-posta</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ornek@hukukofisi.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Şifre</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {serverError && (
-                <p className="text-sm font-medium text-destructive">{serverError}</p>
-              )}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting ? 'Giriş yapılıyor…' : 'Giriş Yap'}
-              </Button>
-            </form>
-          </Form>
+          <Suspense>
+            <LoginForm />
+          </Suspense>
           <p className="mt-4 text-center text-sm text-neutral-500">
             Hesabınız yok mu?{' '}
             <Link href="/register" className="text-neutral-900 font-medium hover:underline">
